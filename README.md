@@ -47,7 +47,7 @@ Keys (with defaults):
 ./mon1mm [path/to/config]
 ```
 
-If no path is given it uses `./mon1mm .conf`. Stop it with `Ctrl+C`
+If no path is given it uses `./mon1mm.conf`. Stop it with `Ctrl+C`
 (`SIGINT`) or `SIGTERM`; it closes the socket and DB connection cleanly.
 
 ## Configure N1MM to broadcast

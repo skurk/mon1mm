@@ -1,6 +1,6 @@
 # mon1mm
 
-MoN1MM (assuming N1MM is prononunced rhyming with 'limb') is a small
+MoN1MM ("monitor" and "n1mm" combined, assuming N1MM is prononunced as rhyming with 'limb') is a small
 Linux console application (C11) that listens for [N1MM Logger+](https://n1mmwp.hamdocs.com/)
 UDP broadcasts and stores the contact data in a MySQL/MariaDB database.
 

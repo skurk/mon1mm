@@ -1,8 +1,8 @@
 # mon1mm
 
-A small Linux console application (C11) that listens for
-[N1MM Logger+](https://n1mmwp.hamdocs.com/) UDP broadcasts and stores the
-contact data in a MySQL/MariaDB database.
+MoN1MM (assuming N1MM is prononunced rhyming with 'limb') is a small
+Linux console application (C11) that listens for [N1MM Logger+](https://n1mmwp.hamdocs.com/)
+UDP broadcasts and stores the contact data in a MySQL/MariaDB database.
 
 It handles the `contactinfo`, `contactreplace`, and `contactdelete` message
 types and ignores everything else (score, radio, spots, etc.).

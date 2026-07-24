@@ -17,7 +17,7 @@ struct db_ctx {
 
 static int db_do_connect(db_ctx_t *db)
 {
-	bool reconnect = 1;
+//	bool reconnect = 1;
 
 	if (db->conn) {
 		mysql_close(db->conn);
@@ -175,8 +175,8 @@ int db_upsert_contact(db_ctx_t *db, const contact_t *c)
 	}
 
 	rc = 0;
-	log_info("Stored contact call=%s ID=%s",
-			 c->set[F_call] ? c->value[F_call] : "?",
+	log_info("Stored contact callsign=%s ID=%s",
+			 c->set[F_callsign] ? c->value[F_callsign] : "?",
 			 c->set[F_ID] ? c->value[F_ID] : "?");
 
 done:
@@ -233,8 +233,8 @@ int db_delete_contact(db_ctx_t *db, const contact_t *c)
 	}
 
 	rc = 0;
-	log_info("Deleted contact call=%s ID=%s",
-			 c->set[F_call] ? c->value[F_call] : "?", c->value[F_ID]);
+	log_info("Deleted contact callsign=%s ID=%s",
+			 c->set[F_callsign] ? c->value[F_callsign] : "?", c->value[F_ID]);
 
 done:
 	mysql_stmt_close(stmt);

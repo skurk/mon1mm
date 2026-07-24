@@ -26,7 +26,7 @@ typedef enum {
 	F_txfreq,
 	F_operator,
 	F_mode,
-	F_call,
+	F_callsign,
 	F_countryprefix,
 	F_wpxprefix,
 	F_stationprefix,

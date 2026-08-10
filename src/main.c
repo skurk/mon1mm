@@ -11,13 +11,19 @@
 #include <signal.h>
 #include <errno.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
 #define UDP_BUF_SIZE 65536
 
+#define TIMER_SIGNAL (SIGRTMIN +1)
+
 static volatile sig_atomic_t g_running = 1;
+timer_t timerId;
+struct sigaction lotwa;
+db_ctx_t *db;
 
 static void handle_signal(int sig)
 {
@@ -25,21 +31,65 @@ static void handle_signal(int sig)
 	g_running = 0;
 }
 
+static void handle_lotw_autosync(int sig, siginfo_t *si, void *uc)
+{
+	(void)sig;
+	(void)si;
+	(void)uc;
+
+	printf("--kuk--\n");
+	db_select_unsynced(db);
+}
+
 static void install_signal_handlers(void)
 {
+
+	// Handle ^C event
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = handle_signal;
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
 	signal(SIGPIPE, SIG_IGN);
+
+	// Establish interval timer
+	memset(&lotwa, 0, sizeof(lotwa));
+	lotwa.sa_flags = SA_SIGINFO;
+	lotwa.sa_sigaction = handle_lotw_autosync;
+
+	sigset_t mask;
+	sigemptyset(&mask);
+	sigaddset(&mask, TIMER_SIGNAL);
+	pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
+	if(sigaction(TIMER_SIGNAL, &lotwa, NULL) == -1)
+	{
+		perror("sigaction timer failed\n");
+	}
+
+	struct sigevent sev;
+	sev.sigev_notify = SIGEV_SIGNAL;
+	sev.sigev_signo = TIMER_SIGNAL;
+	sev.sigev_value.sival_ptr = &timerId;
+	if(timer_create(CLOCK_REALTIME, &sev, &timerId) == -1)
+	{
+		perror("timer_create failed\n");
+	}
+
+    struct itimerspec its;
+	its.it_value.tv_sec = 10;
+	its.it_value.tv_nsec = 0;
+	its.it_interval.tv_sec = 10;
+	its.it_interval.tv_nsec = 0;
+	if(timer_settime(timerId, 0, &its, NULL) == -1)
+	{
+		perror("timer_settime failed\n");
+	}
 }
 
 int main(int argc, char **argv)
 {
 	const char *conf_path = (argc > 1) ? argv[1] : "./mon1mm.conf";
 	config_t cfg;
-	db_ctx_t *db;
 	int sock;
 	char *buf;
 
@@ -111,10 +161,19 @@ int main(int argc, char **argv)
 		}
 	}
 
+	log_blankline();
+	log_info("Stopping application...");
 	log_info("Shutting down...");
+
 	free(buf);
 	udp_close(sock);
 	db_close(db);
-	log_info("Stopped cleanly");
+
+	log_info("Removing timer...");
+	struct itimerspec zeroIts = {0};
+	timer_settime(timerId, 0, &zeroIts, NULL);
+	timer_delete(timerId);
+
+	log_info("Application stopped cleanly.");
 	return EXIT_SUCCESS;
 }

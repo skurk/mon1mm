@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 void config_defaults(config_t *cfg)
 {
@@ -72,6 +74,8 @@ int config_load(config_t *cfg, const char *path)
 			snprintf(cfg->lotw_certificate, sizeof(cfg->lotw_certificate), "%s", val);
 		else if (strcmp(key, "lotw_password") == 0)
 			snprintf(cfg->lotw_password, sizeof(cfg->lotw_password), "%s", val);
+		else if (strcmp(key, "lotw_autosync") == 0)
+			cfg->lotw_autosync = strcasecmp(val, "true");
 	}
 
 	fclose(fp);

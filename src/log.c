@@ -26,3 +26,9 @@ void log_msg(const char *level, const char *fmt, ...)
 	fputc('\n', out);
 	fflush(out);
 }
+
+void log_blankline()
+{
+	fprintf(stdout, "\n");
+	fflush(stdout);
+}

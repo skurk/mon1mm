@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <stdbool.h>
+
 typedef struct {
 	int  udp_port;
 	char db_host[256];
@@ -10,6 +12,7 @@ typedef struct {
 	char db_name[128];
 	char lotw_certificate[1024];
 	char lotw_password[128];
+	bool lotw_autosync;
 } config_t;
 
 /* Load configuration from an INI-style file.

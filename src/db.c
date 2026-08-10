@@ -1,5 +1,6 @@
 #include "db.h"
 #include "log.h"
+#include "schema.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,17 +82,14 @@ db_ctx_t *db_connect(const config_t *cfg)
 		return NULL;
 	}
 
-	log_info("Connected to MySQL %s:%d db=%s", cfg->db_host, cfg->db_port,
-			 cfg->db_name);
+	log_info("Connected to MySQL %s:%d db=%s", cfg->db_host, cfg->db_port, cfg->db_name);
 	return db;
 }
 
 void db_close(db_ctx_t *db)
 {
-	if (!db)
-		return;
-	if (db->conn)
-		mysql_close(db->conn);
+	if (!db) return;
+	if (db->conn) mysql_close(db->conn);
 	free(db);
 }
 
@@ -132,11 +130,11 @@ static const char *upsert_sql(void)
 
 int db_upsert_contact(db_ctx_t *db, const contact_t *c)
 {
-	MYSQL_STMT   *stmt;
-	MYSQL_BIND    bind[FIELD_COUNT];
+	MYSQL_STMT *stmt;
+	MYSQL_BIND bind[FIELD_COUNT];
 	unsigned long lengths[FIELD_COUNT];
-	bool       is_null[FIELD_COUNT];
-	int           i, rc = -1;
+	bool is_null[FIELD_COUNT];
+	int i, rc = -1;
 
 	if (db_ensure(db) != 0)
 		return -1;
@@ -240,3 +238,65 @@ done:
 	mysql_stmt_close(stmt);
 	return rc;
 }
+
+int db_select_unsynced(db_ctx_t *db)
+{
+	MYSQL_STMT   *stmt;
+	MYSQL_BIND    bind[64];
+	static const char *sql = "SELECT * FROM contacts WHERE SyncedToLotw = 0";
+
+	if (db_ensure(db) != 0)
+		return -1;
+
+	stmt = mysql_stmt_init(db->conn);
+	if (!stmt) {
+		log_error("mysql_stmt_init failed: %s", mysql_error(db->conn));
+		return -1;
+	}
+
+	if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
+		log_error("delete execute failed: %s", mysql_stmt_error(stmt));
+		return -1;
+	}
+
+	if(mysql_stmt_execute(stmt)	) {
+        log_error("mysql_stmt_query() failed: %s\n", mysql_stmt_error(stmt));
+        return -1;
+	}
+
+	memset(bind, 0, sizeof(bind));
+	unsigned long length;
+	bool is_null;
+
+	int array_length = sizeof(DbColumns) / sizeof(DbColumns[0]);
+	int x = 0;
+
+	for(x=0; x<array_length; x++)
+	{
+		bind[x].buffer_type = DbColumns[x].buffer_type;
+		bind[x].buffer = DbColumns[x].buffer;
+		bind[x].buffer_length = DbColumns[x].buffer_length;
+	}
+	bind[x].is_null = &is_null;
+	bind[x].length = &length;
+
+	mysql_stmt_bind_result(stmt, bind);
+	mysql_stmt_store_result(stmt);
+
+	printf("while..\n");
+
+	while(mysql_stmt_fetch(stmt) == 0) {
+		printf("Inside while..\n");
+		if(!is_null) {
+			log_info("Column is: %s", db_row_callsign);
+		}
+	}
+
+	printf("close..\n");
+
+	mysql_stmt_close(stmt);
+
+	log_info("yo, lol");
+	return 0;
+}
+

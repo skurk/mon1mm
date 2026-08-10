@@ -4,6 +4,7 @@
 /* Print a timestamped log line to stdout (level "INFO") or stderr
  * (level "ERROR"/"WARN"). printf-style formatting. */
 void log_msg(const char *level, const char *fmt, ...);
+void log_blankline();
 
 #define log_info(...)  log_msg("INFO",  __VA_ARGS__)
 #define log_warn(...)  log_msg("WARN",  __VA_ARGS__)

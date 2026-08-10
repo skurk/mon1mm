@@ -8,6 +8,8 @@ CREATE DATABASE IF NOT EXISTS n1mmlogs
 
 USE n1mmlogs;
 
+DROP TABLE contacts;
+
 CREATE TABLE IF NOT EXISTS contacts (
 	ID              VARCHAR(50)   NOT NULL,
 	app             VARCHAR(100),
@@ -54,6 +56,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 	IsRunQSO        INT,
 	Frequency       DECIMAL(15,2),
 	IsClaimedQso    INT,
+	SyncedToLotw	BOOL NOT NULL DEFAULT FALSE,
 	updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 						ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (ID),

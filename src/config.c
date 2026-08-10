@@ -68,6 +68,10 @@ int config_load(config_t *cfg, const char *path)
 			snprintf(cfg->db_password, sizeof(cfg->db_password), "%s", val);
 		else if (strcmp(key, "db_name") == 0)
 			snprintf(cfg->db_name, sizeof(cfg->db_name), "%s", val);
+		else if (strcmp(key, "lotw_certificate") == 0)
+			snprintf(cfg->lotw_certificate, sizeof(cfg->lotw_certificate), "%s", val);
+		else if (strcmp(key, "lotw_password") == 0)
+			snprintf(cfg->lotw_password, sizeof(cfg->lotw_password), "%s", val);
 	}
 
 	fclose(fp);

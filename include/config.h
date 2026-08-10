@@ -8,6 +8,8 @@ typedef struct {
 	char db_user[128];
 	char db_password[256];
 	char db_name[128];
+	char lotw_certificate[1024];
+	char lotw_password[128];
 } config_t;
 
 /* Load configuration from an INI-style file.

@@ -2,11 +2,11 @@
 --
 -- Run with:  mysql -u root -p < schema.sql
 
-CREATE DATABASE IF NOT EXISTS n1mm
+CREATE DATABASE IF NOT EXISTS n1mmlogs
 	CHARACTER SET utf8mb4
 	COLLATE utf8mb4_unicode_ci;
 
-USE n1mm;
+USE n1mmlogs;
 
 CREATE TABLE IF NOT EXISTS contacts (
 	ID              VARCHAR(50)   NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 	txfreq          DECIMAL(15,2),
 	operator        VARCHAR(50),
 	mode            VARCHAR(20),
-	call            VARCHAR(50),
+	callsign        VARCHAR(30),
 	countryprefix   VARCHAR(20),
 	wpxprefix       VARCHAR(20),
 	stationprefix   VARCHAR(50),
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 	updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 						ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (ID),
-	KEY idx_call (call),
+	KEY idx_call (callsign),
 	KEY idx_contestnr (contestnr),
 	KEY idx_timestamp (timestamp)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

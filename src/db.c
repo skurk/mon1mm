@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
 #include <mysql/mysql.h>
 
@@ -18,8 +19,6 @@ struct db_ctx {
 
 static int db_do_connect(db_ctx_t *db)
 {
-//	bool reconnect = 1;
-
 	if (db->conn) {
 		mysql_close(db->conn);
 		db->conn = NULL;
@@ -30,9 +29,6 @@ static int db_do_connect(db_ctx_t *db)
 		log_error("mysql_init failed");
 		return -1;
 	}
-
-//  MYSQL_OPT_RECONNECT is deprecated
-//	mysql_options(db->conn, MYSQL_OPT_RECONNECT, &reconnect);
 
 	if (!mysql_real_connect(db->conn, db->cfg.db_host, db->cfg.db_user,
 							db->cfg.db_password, db->cfg.db_name,
@@ -106,25 +102,44 @@ static const char *upsert_sql(void)
 
 	n = 0;
 	n += snprintf(sql + n, sizeof(sql) - n, "INSERT INTO contacts (");
-	for (i = 0; i < FIELD_COUNT; i++)
-		n += snprintf(sql + n, sizeof(sql) - n, "%s`%s`",
-					  (i ? "," : ""), field_names[i]);
-	n += snprintf(sql + n, sizeof(sql) - n, ") VALUES (");
-	for (i = 0; i < FIELD_COUNT; i++)
-		n += snprintf(sql + n, sizeof(sql) - n, "%s?", (i ? "," : ""));
-	n += snprintf(sql + n, sizeof(sql) - n, ") ON DUPLICATE KEY UPDATE ");
+	for (i = 0; i < FIELD_COUNT-1; i++)
 	{
-		int first = 1;
-		for (i = 0; i < FIELD_COUNT; i++) {
-			if (i == F_ID)
-				continue; /* never update the key */
-			n += snprintf(sql + n, sizeof(sql) - n, "%s`%s`=VALUES(`%s`)",
-						  (first ? "" : ","), field_names[i], field_names[i]);
-			first = 0;
+		if(strcasecmp(field_names[i], "call") == 0)
+		{
+			n += snprintf(sql + n, sizeof(sql) - n, "%s`%s`", (i ? "," : ""), "callsign");
 		}
+		else
+		{
+			n += snprintf(sql + n, sizeof(sql) - n, "%s`%s`", (i ? "," : ""), field_names[i]);
+		}
+	}
+	n += snprintf(sql + n, sizeof(sql) - n, ") VALUES (");
+
+	for (i = 0; i < FIELD_COUNT-1; i++)
+	{
+		n += snprintf(sql + n, sizeof(sql) - n, "%s?", (i ? "," : ""));
+	}
+
+	n += snprintf(sql + n, sizeof(sql) - n, ") ON DUPLICATE KEY UPDATE ");
+
+	int first = 1;
+	for (i = 0; i < FIELD_COUNT-1; i++) {
+		if (i == F_ID)
+			continue; /* never update the key */
+
+		if(strcasecmp(field_names[i], "call") == 0)
+		{
+			n += snprintf(sql + n, sizeof(sql) - n, "%s`%s`=VALUES(`%s`)", (first ? "" : ","), "callsign", "callsign");
+		}
+		else
+		{
+			n += snprintf(sql + n, sizeof(sql) - n, "%s`%s`=VALUES(`%s`)", (first ? "" : ","), field_names[i], field_names[i]);
+		}
+		first = 0;
 	}
 
 	built = 1;
+
 	return sql;
 }
 
@@ -152,7 +167,7 @@ int db_upsert_contact(db_ctx_t *db, const contact_t *c)
 	}
 
 	memset(bind, 0, sizeof(bind));
-	for (i = 0; i < FIELD_COUNT; i++) {
+	for (i = 0; i < FIELD_COUNT-1; i++) {
 		is_null[i] = c->set[i] ? 0 : 1;
 		lengths[i] = c->set[i] ? (unsigned long)strlen(c->value[i]) : 0;
 		bind[i].buffer_type = MYSQL_TYPE_STRING;
@@ -283,20 +298,13 @@ int db_select_unsynced(db_ctx_t *db)
 	mysql_stmt_bind_result(stmt, bind);
 	mysql_stmt_store_result(stmt);
 
-	printf("while..\n");
-
 	while(mysql_stmt_fetch(stmt) == 0) {
-		printf("Inside while..\n");
 		if(!is_null) {
 			log_info("Column is: %s", db_row_callsign);
 		}
 	}
 
-	printf("close..\n");
-
 	mysql_stmt_close(stmt);
-
-	log_info("yo, lol");
 	return 0;
 }
 

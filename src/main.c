@@ -36,8 +36,6 @@ static void handle_lotw_autosync(int sig, siginfo_t *si, void *uc)
 	(void)sig;
 	(void)si;
 	(void)uc;
-
-	printf("--kuk--\n");
 	db_select_unsynced(db);
 }
 

@@ -42,7 +42,7 @@ typedef enum {
 	F_qth,
 	F_name,
 	F_power,
-	F_misc,
+	F_misctext,
 	F_zone,
 	F_prec,
 	F_ck,
@@ -58,9 +58,12 @@ typedef enum {
 	F_IsOriginal,
 	F_NetBiosName,
 	F_IsRunQSO,
-	F_Frequency,
+	F_StationName,
 	F_ID,
 	F_IsClaimedQso,
+	F_oldtimestamp,
+	F_oldcall,
+	F_SentExchange,
 	FIELD_COUNT
 } field_index_t;
 

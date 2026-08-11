@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "xmlparse.h"
 #include "log.h"
+#include <stdio.h>
 
 #include <string.h>
 #include <strings.h>
@@ -34,7 +35,7 @@ const char *const field_names[FIELD_COUNT] = {
 	"qth",
 	"name",
 	"power",
-	"misc",
+	"misctext",
 	"zone",
 	"prec",
 	"ck",
@@ -50,9 +51,12 @@ const char *const field_names[FIELD_COUNT] = {
 	"IsOriginal",
 	"NetBiosName",
 	"IsRunQSO",
-	"Frequency",
+	"StationName",
 	"ID",
-	"IsClaimedQso"
+	"IsClaimedQso",
+	"oldtimestamp",
+	"oldcall",
+	"SentExchange",
 };
 
 typedef struct {
@@ -65,9 +69,12 @@ typedef struct {
 static int field_lookup(const char *name)
 {
 	int i;
-	for (i = 0; i < FIELD_COUNT; i++) {
+	for (i = 0; i < FIELD_COUNT-1; i++)
+	{
 		if (strcasecmp(name, field_names[i]) == 0)
+		{
 			return i;
+		}
 	}
 	return -1;
 }
@@ -95,11 +102,13 @@ static void XMLCALL start_element(void *userdata, const XML_Char *name,
 
 	if (ctx->depth == 2 && ctx->out->type != MSG_NONE) {
 		int idx = field_lookup(name);
-		ctx->cur_field = idx;
-		ctx->cur_len = 0;
-		if (idx >= 0) {
-			ctx->out->value[idx][0] = '\0';
-			ctx->out->set[idx] = 1;
+		if(idx > 0) {
+			ctx->cur_field = idx;
+			ctx->cur_len = 0;
+			if (idx >= 0) {
+				ctx->out->value[idx][0] = '\0';
+				ctx->out->set[idx] = 1;
+			}
 		}
 	}
 }

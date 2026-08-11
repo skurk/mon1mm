@@ -30,7 +30,7 @@ char		db_row_comment[255];
 char		db_row_qth[100];
 char		db_row_name[100];
 char		db_row_power[20];
-char		db_row_misc[255];
+char		db_row_misctext[255];
 int			db_row_zone;
 char		db_row_prec[10];
 int			db_row_ck;
@@ -46,8 +46,10 @@ int			db_row_networkedcompnr;
 char		db_row_isoriginal[20];
 char		db_row_netbiosname[100];
 int			db_row_isrunqso;
-char		db_row_frequency[32];
 int			db_row_isclaimedqso;
+char		db_row_stationname[100];
+MYSQL_TIME	db_row_oldtimestamp;
+char		db_row_oldcall[30];
 int			db_row_syncedtolotw;
 MYSQL_TIME	db_row_updated_at;
 
@@ -195,7 +197,7 @@ struct DbEntry DbColumns[] = {
 	},
 	{
 		MYSQL_TYPE_STRING,
-		db_row_misc,
+		db_row_misctext,
 		255,
 	},
 	{
@@ -266,7 +268,7 @@ struct DbEntry DbColumns[] = {
 	{
 		MYSQL_TYPE_STRING,
 		db_row_netbiosname,
-		1000,
+		100,
 	},
 	{
 		MYSQL_TYPE_INT24,
@@ -275,13 +277,23 @@ struct DbEntry DbColumns[] = {
 	},
 	{
 		MYSQL_TYPE_STRING,
-		db_row_frequency,
-		32,
+		db_row_stationname,
+		100,
 	},
 	{
 		MYSQL_TYPE_INT24,
 		&db_row_isclaimedqso,
 		1,
+	},
+	{
+		MYSQL_TYPE_DATETIME,
+		&db_row_oldtimestamp,
+		1,
+	},
+	{
+		MYSQL_TYPE_STRING,
+		db_row_oldcall,
+		30,
 	},
 	{
 		MYSQL_TYPE_TINY,

@@ -82,7 +82,17 @@ sudo ufw allow 12060/udp
 | `mon1mm.conf`      | Sample configuration                        |
 | `Makefile`         | Build script                                |
 
+## Oddities
+
+The code is designed to import fields directly into the SQL database, but
+`call` conflicts with the MySQL reserved word for calling procedures. As a
+remedy, this is renamed to `callsign` in runtime before being stored in SQL.
 
 ## Work in progress
 
 This is a project under development. Stability and functionality may be so-so.
+
+UDP packet captures have been tested and confirmed OK and contacts are
+stored in the database as expected.
+
+LoTW sync is started, but currently not functional. Needs more work.

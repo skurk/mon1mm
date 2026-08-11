@@ -1,4 +1,3 @@
-
 #include "lotw.h"
 #include "log.h"
 

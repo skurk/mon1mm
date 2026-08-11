@@ -8,7 +8,7 @@ CREATE DATABASE IF NOT EXISTS n1mmlogs
 
 USE n1mmlogs;
 
-DROP TABLE contacts;
+DROP TABLE IF EXISTS contacts;
 
 CREATE TABLE IF NOT EXISTS contacts (
 	ID              VARCHAR(50)   NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 	qth             VARCHAR(100),
 	name            VARCHAR(100),
 	power           VARCHAR(20),
-	misc            VARCHAR(255),
+	misctext        VARCHAR(255),
 	zone            INT,
 	prec            VARCHAR(10),
 	ck              INT,
@@ -54,8 +54,10 @@ CREATE TABLE IF NOT EXISTS contacts (
 	IsOriginal      VARCHAR(20),
 	NetBiosName     VARCHAR(100),
 	IsRunQSO        INT,
-	Frequency       DECIMAL(15,2),
+	StationName		VARCHAR(100),
 	IsClaimedQso    INT,
+	oldtimestamp	DATETIME,
+	oldcall			VARCHAR(50),
 	SyncedToLotw	BOOL NOT NULL DEFAULT FALSE,
 	updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 						ON UPDATE CURRENT_TIMESTAMP,

@@ -64,7 +64,7 @@ static void install_signal_handlers(void)
 		pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
 		if(sigaction(TIMER_SIGNAL, &lotwa, NULL) == -1)
 		{
-			perror("sigaction timer failed\n");
+			log_warn("sigaction() failed, LoTW sync is disabled");
 			return;
 		}
 
@@ -74,7 +74,7 @@ static void install_signal_handlers(void)
 		sev.sigev_value.sival_ptr = &timerId;
 		if(timer_create(CLOCK_REALTIME, &sev, &timerId) == -1)
 		{
-			perror("timer_create failed\n");
+			log_warn("timer_create() failed, LoTW sync is disabled");
 			return;
 		}
 
@@ -85,7 +85,7 @@ static void install_signal_handlers(void)
 		its.it_interval.tv_nsec = 0;
 		if(timer_settime(timerId, 0, &its, NULL) == -1)
 		{
-			perror("timer_settime failed\n");
+			log_warn("timer_settime() failed, LoTW sync is disabled");
 			return;
 		}
 
@@ -175,10 +175,13 @@ int main(int argc, char **argv)
 	udp_close(sock);
 	db_close(db);
 
-	log_info("Removing timer...");
-	struct itimerspec zeroIts = {0};
-	timer_settime(timerId, 0, &zeroIts, NULL);
-	timer_delete(timerId);
+	if(timerId)
+	{
+		log_info("Removing timer...");
+		struct itimerspec zeroIts = {0};
+		timer_settime(timerId, 0, &zeroIts, NULL);
+		timer_delete(timerId);
+	}
 
 	log_info("Application stopped cleanly.");
 	return EXIT_SUCCESS;

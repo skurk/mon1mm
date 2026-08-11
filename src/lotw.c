@@ -76,7 +76,7 @@ static int build_adif_record(const contact_t *c, const char *station_call,
 	adif_add(out, cap, "TIME_ON", time);
 	adif_add(out, cap, "BAND", fv(c, F_band));
 	adif_add(out, cap, "MODE", fv(c, F_mode));
-	adif_add(out, cap, "FREQ", fv(c, F_Frequency));
+	adif_add(out, cap, "FREQ", fv(c, F_txfreq));
 	adif_add(out, cap, "GRIDSQUARE", fv(c, F_gridsquare));
 	adif_add(out, cap, "RST_SENT", fv(c, F_snt));
 	adif_add(out, cap, "RST_RCVD", fv(c, F_rcv));

@@ -15,6 +15,7 @@ void config_defaults(config_t *cfg)
 	snprintf(cfg->db_user, sizeof(cfg->db_user), "%s", "root");
 	cfg->db_password[0] = '\0';
 	snprintf(cfg->db_name, sizeof(cfg->db_name), "%s", "n1mm");
+	cfg->lotw_sync_interval = 0;
 }
 
 static char *trim(char *s)
@@ -74,8 +75,8 @@ int config_load(config_t *cfg, const char *path)
 			snprintf(cfg->lotw_certificate, sizeof(cfg->lotw_certificate), "%s", val);
 		else if (strcmp(key, "lotw_password") == 0)
 			snprintf(cfg->lotw_password, sizeof(cfg->lotw_password), "%s", val);
-		else if (strcmp(key, "lotw_autosync") == 0)
-			cfg->lotw_autosync = strcasecmp(val, "true");
+		else if (strcmp(key, "lotw_sync_interval") == 0)
+			cfg->lotw_sync_interval = atoi(val);
 	}
 
 	fclose(fp);

@@ -12,7 +12,7 @@ typedef struct {
 	char db_name[128];
 	char lotw_certificate[1024];
 	char lotw_password[128];
-	bool lotw_autosync;
+	int  lotw_sync_interval;
 } config_t;
 
 /* Load configuration from an INI-style file.

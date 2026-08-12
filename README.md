@@ -24,22 +24,21 @@ periodically sync new contacts with LoTW.
 
 ## Configure
 
-Copy and edit the sample config:
-
-```sh
-cp mon1mm.conf /etc/mon1mm.conf   # or keep it next to the binary
-```
+Copy and edit the sample config. The keys and default values are:
 
 Keys (with defaults):
 
-| Key           | Default     | Description                     |
-|---------------|-------------|---------------------------------|
-| `udp_port`    | `12060`     | UDP port to listen on           |
-| `db_host`     | `localhost` | MySQL host                      |
-| `db_port`     | `3306`      | MySQL port                      |
-| `db_user`     | `root`      | MySQL user                      |
-| `db_password` | *(empty)*   | MySQL password                  |
-| `db_name`     | `n1mm`      | Database name                   |
+| Key                  | Default     | Description                     |
+|----------------------|-------------|---------------------------------|
+| `udp_port`           | `12060`     | UDP port to listen on           |
+| `db_host`            | `localhost` | MySQL host                      |
+| `db_port`            | `3306`      | MySQL port                      |
+| `db_user`            | `root`      | MySQL user                      |
+| `db_password`        | *(empty)*   | MySQL password                  |
+| `db_name`            | `n1mm`      | Database name                   |
+| `lotw_sync_interval` | `0`         | LoTW sync interval in seconds   |
+| `lotw_certificate`   | *(empty)*   | LoTW p12 certificate file       |
+| `lotw_password`      | *(empty)*   | LoTW password (optional)        |
 
 ## Run
 

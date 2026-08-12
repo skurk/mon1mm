@@ -76,7 +76,9 @@ sudo ufw allow 12060/udp
 | `udp.c/.h`         | UDP socket setup                            |
 | `xmlparse.c/.h`    | libexpat parsing into a contact record      |
 | `db.c/.h`          | MySQL connect, upsert, delete, reconnect    |
+| `schema.h`         | Schema.sql mirror for db context            |
 | `log.c/.h`         | Timestamped logging helpers                 |
+| `lotw.c/.h`        | LoTW sync/upload                            |
 | `schema.sql`       | Database + `contacts` table schema          |
 | `mon1mm.conf`      | Sample configuration                        |
 | `Makefile`         | Build script                                |

@@ -254,6 +254,11 @@ done:
 	return rc;
 }
 
+/*
+** This function select all QSOs that have SyncedToLotw=0, collects the results and submit
+** the contacts to LoTW, followed by tagging the respective rows with SyncedToLotw=1.
+*/
+
 int db_select_unsynced(db_ctx_t *db)
 {
 	MYSQL_STMT   *stmt;
@@ -303,6 +308,10 @@ int db_select_unsynced(db_ctx_t *db)
 			log_info("Column is: %s", db_row_callsign);
 		}
 	}
+
+	// Submit to LoTW
+
+	// Update rows with SyncedToLotw=1
 
 	mysql_stmt_close(stmt);
 	return 0;

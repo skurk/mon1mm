@@ -27,7 +27,7 @@ static int db_do_connect(db_ctx_t *db)
 	db->conn = mysql_init(NULL);
 	if (!db->conn) {
 		log_error("mysql_init failed");
-		return -1;
+		return(-1);
 	}
 
 	if (!mysql_real_connect(db->conn, db->cfg.db_host, db->cfg.db_user,
@@ -36,10 +36,10 @@ static int db_do_connect(db_ctx_t *db)
 		log_error("mysql_real_connect failed: %s", mysql_error(db->conn));
 		mysql_close(db->conn);
 		db->conn = NULL;
-		return -1;
+		return(-1);
 	}
 
-	return 0;
+	return(0);
 }
 
 /* Ensure a live connection, retrying with backoff. Returns 0 on success. */
@@ -48,7 +48,7 @@ static int db_ensure(db_ctx_t *db)
 	int attempt;
 
 	if (db->conn && mysql_ping(db->conn) == 0)
-		return 0;
+		return(0);
 
 	for (attempt = 0; attempt < DB_MAX_RETRIES; attempt++) {
 		int backoff = DB_BACKOFF_BASE << attempt;
@@ -56,30 +56,30 @@ static int db_ensure(db_ctx_t *db)
 				 attempt + 1, DB_MAX_RETRIES);
 		if (db_do_connect(db) == 0) {
 			log_info("DB reconnected");
-			return 0;
+			return(0);
 		}
 		sleep(backoff);
 	}
 
 	log_error("DB reconnect failed after %d attempts", DB_MAX_RETRIES);
-	return -1;
+	return(-1);
 }
 
 db_ctx_t *db_connect(const config_t *cfg)
 {
 	db_ctx_t *db = calloc(1, sizeof(*db));
 	if (!db)
-		return NULL;
+		return(NULL);
 
 	db->cfg = *cfg;
 
 	if (db_do_connect(db) != 0) {
 		free(db);
-		return NULL;
+		return(NULL);
 	}
 
 	log_info("Connected to MySQL %s:%d db=%s", cfg->db_host, cfg->db_port, cfg->db_name);
-	return db;
+	return(db);
 }
 
 void db_close(db_ctx_t *db)
@@ -98,7 +98,7 @@ static const char *upsert_sql(void)
 	size_t n;
 
 	if (built)
-		return sql;
+		return(sql);
 
 	n = 0;
 	n += snprintf(sql + n, sizeof(sql) - n, "INSERT INTO contacts (");
@@ -140,7 +140,9 @@ static const char *upsert_sql(void)
 
 	built = 1;
 
-	return sql;
+	printf("SQL=%s\n", sql );
+
+	return(sql);
 }
 
 int db_upsert_contact(db_ctx_t *db, const contact_t *c)
@@ -149,27 +151,28 @@ int db_upsert_contact(db_ctx_t *db, const contact_t *c)
 	MYSQL_BIND bind[FIELD_COUNT];
 	unsigned long lengths[FIELD_COUNT];
 	bool is_null[FIELD_COUNT];
-	int i, rc = -1;
+	int i, rc =(-1);
 
 	if (db_ensure(db) != 0)
-		return -1;
+		return(-1);
 
 	stmt = mysql_stmt_init(db->conn);
 	if (!stmt) {
 		log_error("mysql_stmt_init failed: %s", mysql_error(db->conn));
-		return -1;
+		return(-1);
 	}
 
 	if (mysql_stmt_prepare(stmt, upsert_sql(), (unsigned long)strlen(upsert_sql()))) {
 		log_error("upsert prepare failed: %s", mysql_stmt_error(stmt));
 		mysql_stmt_close(stmt);
-		return -1;
+		return(-1);
 	}
 
 	memset(bind, 0, sizeof(bind));
 	for (i = 0; i < FIELD_COUNT-1; i++) {
 		is_null[i] = c->set[i] ? 0 : 1;
 		lengths[i] = c->set[i] ? (unsigned long)strlen(c->value[i]) : 0;
+
 		bind[i].buffer_type = MYSQL_TYPE_STRING;
 		bind[i].buffer = (void *)c->value[i];
 		bind[i].buffer_length = FIELD_MAX;
@@ -194,7 +197,7 @@ int db_upsert_contact(db_ctx_t *db, const contact_t *c)
 
 done:
 	mysql_stmt_close(stmt);
-	return rc;
+	return(rc);
 }
 
 int db_delete_contact(db_ctx_t *db, const contact_t *c)
@@ -204,26 +207,26 @@ int db_delete_contact(db_ctx_t *db, const contact_t *c)
 	unsigned long length;
 	bool       is_null;
 	static const char *sql = "DELETE FROM contacts WHERE `ID` = ?";
-	int rc = -1;
+	int rc =(-1);
 
 	if (!c->set[F_ID]) {
 		log_warn("contactdelete without ID, ignoring");
-		return -1;
+		return(-1);
 	}
 
 	if (db_ensure(db) != 0)
-		return -1;
+		return(-1);
 
 	stmt = mysql_stmt_init(db->conn);
 	if (!stmt) {
 		log_error("mysql_stmt_init failed: %s", mysql_error(db->conn));
-		return -1;
+		return(-1);
 	}
 
 	if (mysql_stmt_prepare(stmt, sql, (unsigned long)strlen(sql))) {
 		log_error("delete prepare failed: %s", mysql_stmt_error(stmt));
 		mysql_stmt_close(stmt);
-		return -1;
+		return(-1);
 	}
 
 	memset(&bind, 0, sizeof(bind));
@@ -251,7 +254,7 @@ int db_delete_contact(db_ctx_t *db, const contact_t *c)
 
 done:
 	mysql_stmt_close(stmt);
-	return rc;
+	return(rc);
 }
 
 /*
@@ -266,22 +269,22 @@ int db_select_unsynced(db_ctx_t *db)
 	static const char *sql = "SELECT * FROM contacts WHERE SyncedToLotw = 0";
 
 	if (db_ensure(db) != 0)
-		return -1;
+		return(-1);
 
 	stmt = mysql_stmt_init(db->conn);
 	if (!stmt) {
 		log_error("mysql_stmt_init failed: %s", mysql_error(db->conn));
-		return -1;
+		return(-1);
 	}
 
 	if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
 		log_error("delete execute failed: %s", mysql_stmt_error(stmt));
-		return -1;
+		return(-1);
 	}
 
 	if(mysql_stmt_execute(stmt)	) {
         log_error("mysql_stmt_query() failed: %s\n", mysql_stmt_error(stmt));
-        return -1;
+        return(-1);
 	}
 
 	memset(bind, 0, sizeof(bind));
@@ -306,6 +309,8 @@ int db_select_unsynced(db_ctx_t *db)
 	while(mysql_stmt_fetch(stmt) == 0) {
 		if(!is_null) {
 			log_info("Column is: %s", db_row_callsign);
+			db_buffer_store_contact(db);
+			db_tag_contact_as_stored(db, db_row_id);
 		}
 	}
 
@@ -314,6 +319,132 @@ int db_select_unsynced(db_ctx_t *db)
 	// Update rows with SyncedToLotw=1
 
 	mysql_stmt_close(stmt);
-	return 0;
+	return(0);
 }
 
+int db_buffer_store_contact(db_ctx_t *db)
+{
+	MYSQL_STMT *stmt;
+	char sql[8192] = {};
+
+	/* Build the string first .. */
+
+	char buffer[4096] = {};
+	char datebuffer[64] = {};
+	char timebuffer[64] = {};
+	char zonebuffer[64] = {};
+	char bandbuffer[64] = {};
+	char rxfreq[64] = {};
+	char txfreq[64] = {};
+
+	sprintf(datebuffer, "%04d%02d%02d",
+						db_row_timestamp.year,
+						db_row_timestamp.month,
+						db_row_timestamp.day);
+	sprintf(timebuffer, "%02d%02d%02d",
+						db_row_timestamp.hour,
+						db_row_timestamp.minute,
+						db_row_timestamp.second);
+	sprintf(zonebuffer, "%d", db_row_zone);
+
+	sprintf(rxfreq, "%.6f", (float) (atoi(db_row_rxfreq)/100000.0));
+	sprintf(txfreq, "%.6f", (float) (atoi(db_row_txfreq)/100000.0));
+
+	printf("band=%s\n", db_row_band);
+	printf("rxfreq=%s\n", rxfreq);
+	printf("txfreq=%s\n", txfreq);
+
+	if(strcmp(db_row_band,"1.8") == 0) sprintf(bandbuffer, "160M");
+	else if(strcmp(db_row_band,"3.5") == 0) sprintf(bandbuffer, "80M");
+	else if(strcmp(db_row_band,"5") == 0) sprintf(bandbuffer, "60M");
+	else if(strcmp(db_row_band,"7") == 0) sprintf(bandbuffer, "40M");
+	else if(strcmp(db_row_band,"10") == 0) sprintf(bandbuffer, "30M");
+	else if(strcmp(db_row_band,"14") == 0) sprintf(bandbuffer, "20M");
+	else if(strcmp(db_row_band,"18") == 0) sprintf(bandbuffer, "17M");
+	else if(strcmp(db_row_band,"21") == 0) sprintf(bandbuffer, "15M");
+	else if(strcmp(db_row_band,"24") == 0) sprintf(bandbuffer, "12M");
+	else if(strcmp(db_row_band,"28") == 0) sprintf(bandbuffer, "10M");
+	else if(strcmp(db_row_band,"50") == 0) sprintf(bandbuffer, "6M");
+	else if(strcmp(db_row_band,"70") == 0) sprintf(bandbuffer, "4M");
+	else if(strcmp(db_row_band,"144") == 0) sprintf(bandbuffer, "2M");
+
+	sprintf(buffer, " <CALL:%ld>%s" \
+					" <QSO_DATE:%ld>%s" \
+					" <TIME_ON:%ld>%s" \
+					" <BAND:%ld>%s" \
+					" <STATION_CALLSIGN:%ld>%s" \
+					" <FREQ:%ld>%s" \
+					" <FREQ_RX:%ld>%s" \
+					" <MODE:%ld>%s" \
+					" <RST_RCVD:%ld>%s" \
+					" <RST_SENT:%ld>%s" \
+					" <OPERATOR:%ld>%s" \
+					" <CQZ:%ld>%s" \
+					" <PFX:%ld>%s" \
+					" <EOR>" \
+					"\n",
+		strlen(db_row_callsign), db_row_callsign,
+		strlen(datebuffer), datebuffer,
+		strlen(timebuffer), timebuffer,
+		strlen(bandbuffer), bandbuffer,
+		strlen(db_row_mycall), db_row_mycall,
+		strlen(txfreq), txfreq,
+		strlen(rxfreq), rxfreq,
+		strlen(db_row_mode), db_row_mode,
+		strlen(db_row_rcv), db_row_rcv,
+		strlen(db_row_snt), db_row_snt,
+		strlen(db_row_operator), db_row_operator,
+		strlen(zonebuffer), zonebuffer,
+		strlen(db_row_wpxprefix), db_row_wpxprefix
+	);
+
+	/* Push string to pending table */
+
+	sprintf(sql, "UPDATE pending SET contacts = CONCAT(contacts, ('%s');\n", buffer );
+
+	stmt = mysql_stmt_init(db->conn);
+	if (!stmt) {
+		log_error("mysql_stmt_init failed: %s", mysql_error(db->conn));
+		return(-1);
+	}
+
+	if (mysql_stmt_prepare(stmt, sql, (unsigned long)strlen(sql))) {
+		log_error("delete prepare failed: %s", mysql_stmt_error(stmt));
+		mysql_stmt_close(stmt);
+		return(-1);
+	}
+
+	if (mysql_stmt_execute(stmt)) {
+		log_error("delete execute failed: %s", mysql_stmt_error(stmt));
+		return(-1);
+	}
+
+	return(0);
+}
+
+int db_tag_contact_as_stored(db_ctx_t *db, char *id)
+{
+	MYSQL_STMT *stmt;
+	char sql[1024];
+
+	sprintf(sql, "UPDATE contacts SET SyncedToLotw=1 WHERE id='%s'", id);
+
+	stmt = mysql_stmt_init(db->conn);
+	if (!stmt) {
+		log_error("mysql_stmt_init failed: %s", mysql_error(db->conn));
+		return(-1);
+	}
+
+	if (mysql_stmt_prepare(stmt, sql, (unsigned long)strlen(sql))) {
+		log_error("delete prepare failed: %s", mysql_stmt_error(stmt));
+		mysql_stmt_close(stmt);
+		return(-1);
+	}
+
+	if (mysql_stmt_execute(stmt)) {
+		log_error("delete execute failed: %s", mysql_stmt_error(stmt));
+		return(-1);
+	}
+
+	return(0);
+}

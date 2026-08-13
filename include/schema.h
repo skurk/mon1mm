@@ -10,8 +10,8 @@ int			db_row_contestnr;
 MYSQL_TIME	db_row_timestamp;
 char		db_row_mycall[50];
 char		db_row_band[20];
-char		db_row_rxfreq[32];
-char		db_row_txfreq[32];
+char 		db_row_rxfreq[32];
+char 		db_row_txfreq[32];
 char		db_row_operator[50];
 char		db_row_mode[20];
 char		db_row_callsign[30];
@@ -97,13 +97,13 @@ struct DbEntry DbColumns[] = {
 	},
 	{
 		MYSQL_TYPE_STRING,
-		db_row_rxfreq,
-		32,
+		&db_row_rxfreq,
+		1,
 	},
 	{
 		MYSQL_TYPE_STRING,
-		db_row_txfreq,
-		32,
+		&db_row_txfreq,
+		1,
 	},
 	{
 		MYSQL_TYPE_STRING,

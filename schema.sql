@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS contacts (
 	timestamp       DATETIME,
 	mycall          VARCHAR(50),
 	band            VARCHAR(20),
-	rxfreq          DECIMAL(15,2),
-	txfreq          DECIMAL(15,2),
+	rxfreq          VARCHAR(32),
+	txfreq          VARCHAR(32),
 	operator        VARCHAR(50),
 	mode            VARCHAR(20),
 	callsign        VARCHAR(30),
@@ -66,3 +66,10 @@ CREATE TABLE IF NOT EXISTS contacts (
 	KEY idx_contestnr (contestnr),
 	KEY idx_timestamp (timestamp)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS pending;
+
+CREATE TABLE IF NOT EXISTS pending (
+	contact			LONGTEXT
+);
+

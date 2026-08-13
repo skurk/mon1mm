@@ -11,7 +11,6 @@ typedef struct {
 	char db_password[256];
 	char db_name[128];
 	char lotw_certificate[1024];
-	char lotw_password[128];
 	int  lotw_sync_interval;
 } config_t;
 
